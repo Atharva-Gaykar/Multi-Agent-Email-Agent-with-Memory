@@ -52,3 +52,9 @@ def send_draft_by_id(draft_id: str):
         if error.resp.status == 404:
             return f"ERROR: Draft ID {draft_id} was not found. Please verify the ID or check if it was already sent."
         return f"ERROR: An unexpected error occurred: {error}"
+
+
+email_writing_agent_tools = [
+    create_gmail_draft,
+    send_draft_by_id
+]

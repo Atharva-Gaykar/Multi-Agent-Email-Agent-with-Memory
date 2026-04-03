@@ -4,7 +4,7 @@ from langchain.tools import tool
 search_memory_tool = create_search_memory_tool(
     namespace=(
         "email",
-        "{langgraph_user_id}",
+        "{user_id}",
         "collection"
     )
 )
