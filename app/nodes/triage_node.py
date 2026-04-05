@@ -26,6 +26,6 @@ def route_after_triage(state: EmailAgentState):
     label = state["triage_label"]
      # Go to the node that formats the prompt
     if label == "FOLLOW_UP_REQUIRED":
-        return "prepare_context_node"
+        return "check_previous_email_exist_node"
     
     return "archive_node"

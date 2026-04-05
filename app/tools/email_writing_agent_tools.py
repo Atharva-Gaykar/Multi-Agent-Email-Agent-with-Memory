@@ -8,6 +8,12 @@ from langchain_google_community import GmailToolkit
 @tool(args_schema=CreateDraftSchema)
 def create_gmail_draft(to: str, subject: str, body: str):
     """Creates a new Gmail draft after human approval."""
+
+    if isinstance(to, list):
+        if len(to) > 0:
+            to = str(to[0])
+        else:
+            return "ERROR: 'to' parameter is an empty list. Please provide a valid email string."
     
     # 1. Pause and ask for review
     response = interrupt({

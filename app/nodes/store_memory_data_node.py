@@ -44,4 +44,4 @@ def store_memory_and_data_node(state: EmailAgentState, config: RunnableConfig):
             print(f"--- Memory Node Error: {e} ---")
             raise e
 
-    return {"memory_agent_messages": [AIMessage(content="Memory successfully persisted.")]}
+    return {"memory_agent_messages": [AIMessage(content="Memory successfully persisted.")],"email_sent": True}

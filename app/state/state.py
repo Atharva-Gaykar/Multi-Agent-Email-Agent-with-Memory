@@ -56,6 +56,8 @@ class EmailAgentState(TypedDict):
 
     context_agent_messages:Annotated[Sequence[BaseMessage],add_messages]
 
+    email_sent: Optional[bool]
+
    
     human_approved: Optional[bool]
     reply_email_body:Optional[str]  

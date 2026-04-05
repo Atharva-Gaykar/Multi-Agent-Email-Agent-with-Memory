@@ -14,7 +14,7 @@ class EmailMemory(BaseModel):
         description="The email address of the person with whom user is communicating."
     )
     
-    content: str = Field(
+    summary: str = Field(
         ..., 
         description="A concise summary of the key information, intent, and decisions found in the emails.The content should be stored using user name"
     )
