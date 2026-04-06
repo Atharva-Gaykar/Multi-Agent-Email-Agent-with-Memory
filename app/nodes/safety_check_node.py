@@ -34,8 +34,10 @@ def safety_classifier_node(state: EmailAgentState) -> dict:
         return {"is_safe": False, "safety_reason": f"API error {e.response.status_code}"}
     
 
-
 def after_safety(state: EmailAgentState) -> str:
-    if not state["is_safe"]:
-        return "unsafe_emails_node"
-    return "triage_node"
+    """
+    Only handles safety routing.
+    """
+    if not state.get("is_safe"):
+        return "unsafe"
+    return "safe"

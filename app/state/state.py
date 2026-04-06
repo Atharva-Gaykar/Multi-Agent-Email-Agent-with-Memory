@@ -21,9 +21,12 @@ class EmailAgentState(TypedDict):
 
     sender_email_id:         str
 
-    sender_subject:        str     
+    sender_subject:        str   
+
     
-    user_name:      str                  
+    user_name:      str      
+
+    sender_email_token_count: Optional[int]            
 
     # Safety node output
     is_safe:        Optional[bool]

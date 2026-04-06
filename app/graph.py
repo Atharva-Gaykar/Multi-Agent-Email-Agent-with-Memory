@@ -13,8 +13,9 @@ from app.nodes.store_memory_data_node import store_memory_and_data_node
 from app.nodes.unsafe_email_node import unsafe_emails_node
 from app.nodes.check_email_exist_node import *
 from langgraph.types import RetryPolicy
+from app.nodes.summarise_email_body_node import summarise_email_body_node
+from app.nodes.check_token_count_node import *
 from psycopg import OperationalError # Or sqlalchemy.exc.OperationalError depending on your driver
-# imoprt display
 from IPython.display import Image, display
 
 
@@ -38,11 +39,13 @@ builder = StateGraph(EmailAgentState)
 # Nodes
 builder.add_node("safety_check_node", safety_classifier_node)  
 builder.add_node("check_previous_email_exist_node", check_previous_email_exist_node)
+builder.add_node("check_token_count_node", check_token_count_node)
+builder.add_node("summarise_email_body_node", summarise_email_body_node)
 builder.add_node("triage_node", triage_node)
 builder.add_node("prepare_context_node", prepare_context_node)
 builder.add_node("email_writing_agent", email_writing_agent_node)
 
-
+# --- APPLY RETRY POLICIES HERE ---
 builder.add_node(
     "store_memory_and_data_node", 
     store_memory_and_data_node, 
@@ -61,10 +64,27 @@ builder.add_node("tools", ToolNode(email_writing_agent_tools), retry_policy=tool
 # Edges (Same as your original logic)
 builder.add_edge(START, "safety_check_node")
 
-builder.add_conditional_edges("safety_check_node", after_safety, {
-    "unsafe_emails_node": "unsafe_emails_node",
-    "triage_node": "triage_node",
-})
+builder.add_conditional_edges(
+    "safety_check_node", 
+    after_safety, 
+    {
+        "unsafe": "unsafe_emails_node",
+        "safe": "check_token_count_node" 
+    }
+)
+
+builder.add_conditional_edges(
+    "check_token_count_node", 
+    check_token_limit_router, 
+    {
+        "summarize": "summarise_email_body_node",
+        "triage": "triage_node" 
+    }
+)
+
+builder.add_edge("summarise_email_body_node", "triage_node")
+
+
 
 builder.add_conditional_edges("triage_node", route_after_triage, {
     "check_previous_email_exist_node": "check_previous_email_exist_node", 
@@ -104,9 +124,3 @@ builder.add_edge("parse_node", "store_memory_and_data_node")
 builder.add_edge("store_memory_and_data_node", END)
 builder.add_edge("unsafe_emails_node", END)
 builder.add_edge("archive_node", END)
-
-
-
-graph = builder.compile() 
-
-display(graph)
