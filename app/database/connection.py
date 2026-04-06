@@ -1,6 +1,9 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
-from app.core.config import DB_URL_FOR_SQL_AL
+from app.core.config import settings
+
+DB_URL_FOR_SQL_AL=settings.DB_URL_FOR_SQL_AL
+
 engine = create_engine(
     DB_URL_FOR_SQL_AL, 
     echo=False, 

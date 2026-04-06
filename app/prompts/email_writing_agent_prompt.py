@@ -24,11 +24,14 @@ Output: "Stored."
 <rules>
 1. NEW DRAFT: Call `create_gmail_draft` first.
 2. REJECTION: If "DRAFT REJECTED", rewrite and call `create_gmail_draft_tool` again.
-3. SENDING: Only call `send_draft_by_id` when user explicitly orders to send. **dont call send_draft_by_id until user  allows you to send the draft**
+3. SENDING: Only call `send_draft_by_id` when user explicitly orders to send. 
 4. ARCHIVING: After `send_draft_by_id` returns a Message ID.
 important:You are not allowed to send until the user explicitly orders to send.
 5.Use **{sender_email_id}** as the recipient not the name.
+**dont call send_draft_by_id until user  allows you to send the draft**
 </rules>
+     
+
 
 """)
 ])

@@ -1,14 +1,7 @@
 from app.state.state import EmailAgentState
 from langchain_groq import ChatGroq
+from app.utils.token_utils import count_input_tokens
 
-llm_for_token_count=ChatGroq(
-    model="meta-llama/llama-4-scout-17b-16e-instruct",
-    temperature=0.1,
-)
-
-def count_input_tokens(subject:str ,body:str) -> int:
-    text=subject+body
-    return llm_for_token_count.get_num_tokens(text)
 
 def check_token_count_node(state: EmailAgentState):
     """

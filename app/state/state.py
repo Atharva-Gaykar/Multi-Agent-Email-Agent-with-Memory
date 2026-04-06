@@ -61,7 +61,7 @@ class EmailAgentState(TypedDict):
 
     email_sent: Optional[bool]
 
-   
+    
     human_approved: Optional[bool]
     reply_email_body:Optional[str]  
 

@@ -5,24 +5,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
  
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Email Assistant Project"
- 
     GROQ_API_KEY: str
-    # PINECONE_API_KEY: str
+    DB_URL_FOR_CHECKPOINTER_STORE: str
 
-    # CLOUDINARY_CLOUD_NAME: str
-    # CLOUDINARY_API_KEY: str
-    # CLOUDINARY_API_SECRET: str
-
-    
-    # DB_URL_FOR_CHECKPOINTER_STORE: str
-
-    # DB_URL_FOR_SQL_AL:str
+    DB_URL_FOR_SQL_AL:str
  
-    # model_config = SettingsConfigDict(
-    #     env_file=str(BASE_DIR / ".env"),
-    #     env_file_encoding="utf-8",
-    #     extra="ignore"
-    # )
+    model_config = SettingsConfigDict(
+        env_file=str(BASE_DIR / ".env"),
+        env_file_encoding="utf-8",
+        extra="ignore"
+    )
  
 settings = Settings()
 
