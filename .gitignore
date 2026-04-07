@@ -2,6 +2,9 @@
 .env
 google-credentials.json
 
+credential.json
+token.json
+
 !composer.json  # If you use composer (optional)
 /venv
 
