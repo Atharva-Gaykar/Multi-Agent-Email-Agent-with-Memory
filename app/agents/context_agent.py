@@ -4,7 +4,7 @@ from langchain_groq import ChatGroq
 from app.prompts.context_agent_prompt import context_agent_template
 from app.tools.context_agent_tools import context_agent_tools
 from typing import Any
-from app.agent_memory_store import memory_store
+from app.agent_memory_store import connection
 
 context_agent = create_agent(
     model=ChatGroq(
@@ -12,7 +12,7 @@ context_agent = create_agent(
         temperature=0.1,
     ),
     tools=context_agent_tools,
-    store=memory_store,  
+    store=connection,  
     middleware=[
         ToolCallLimitMiddleware[Any,None](
            tool_name="search_memory",

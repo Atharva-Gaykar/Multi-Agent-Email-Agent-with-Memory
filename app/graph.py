@@ -2,7 +2,6 @@ from app.state.state import EmailAgentState
 from app.nodes.triage_node import *
 from langgraph.prebuilt import ToolNode ,tools_condition
 from app.nodes.archive_node import  archive_node
-from app.tools.email_writing_agent_tools import *
 from app.nodes.email_writing_node import *
 from langgraph.graph import StateGraph,END,START
 from app.tools.email_writing_agent_tools import create_gmail_draft, send_draft_by_id
@@ -16,6 +15,7 @@ from langgraph.types import RetryPolicy
 from app.nodes.summarise_email_body_node import summarise_email_body_node
 from app.nodes.check_token_count_node import *
 from psycopg import OperationalError # Or sqlalchemy.exc.OperationalError depending on your driver
+from app.tools.email_writing_agent_tools import email_writing_agent_tools 
 from IPython.display import Image, display
 
 
