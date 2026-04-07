@@ -35,5 +35,5 @@ pool = ConnectionPool(
     conninfo=DB_URL_FOR_CHECKPOINTER_STORE, 
     min_size=1, 
     max_size=10,
-    kwargs={"autocommit": True} 
+    kwargs={"autocommit": True,"row_factory": dict} 
 )

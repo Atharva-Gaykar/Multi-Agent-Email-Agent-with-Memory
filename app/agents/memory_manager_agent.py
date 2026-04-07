@@ -2,7 +2,7 @@ import types
 from langchain_groq import ChatGroq
 from langmem import create_memory_store_manager
 from app.schemas.memory_agent_schema import EmailMemory
-from app.agent_memory_store import connection
+from app.persistance.memory_store_checkpointer_config import memory_store
 import os
 from app.core.config import settings
 
@@ -51,7 +51,7 @@ memory_manager_agent = create_memory_store_manager(
     model, 
     schemas=[EmailMemory],
     namespace=namespace,
-    store=connection,
+    store=memory_store,
     instructions="Extract required info from incoming mail and its reply .",
     enable_inserts=True,
     enable_deletes=True,
