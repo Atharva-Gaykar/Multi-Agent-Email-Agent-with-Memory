@@ -10,3 +10,4 @@ SQLAlchemy==2.0.41
 google-auth==2.49.1
 langgraph-checkpoint-postgres
 psycopg2-binary==2.9.9
+transformers
