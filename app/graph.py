@@ -42,6 +42,9 @@ tool_node_retry_policy = RetryPolicy(
 builder = StateGraph(EmailAgentState)
 
 # Nodes
+builder = StateGraph(EmailAgentState)
+
+# Nodes
 builder.add_node("safety_check_node", safety_classifier_node)  
 builder.add_node("check_previous_email_exist_node", check_previous_email_exist_node)
 builder.add_node("check_token_count_node", check_token_count_node)
@@ -63,9 +66,10 @@ builder.add_node(
 )
 
 builder.add_node("archive_node", archive_node,retry=db_retry_policy)   
-builder.add_node("parse_node", parse_response_node)
-builder.add_node("tools", ToolNode(email_writing_agent_tools), retry_policy=tool_node_retry_policy)
 
+builder.add_node("tools", ToolNode(tools), retry=tool_node_retry_policy)
+
+# Edges (Same as your original logic)
 builder.add_edge(START, "safety_check_node")
 
 builder.add_conditional_edges(
@@ -119,23 +123,15 @@ builder.add_conditional_edges(
     "tools",
     route_after_tools,
     {
-        "parse_node": "parse_node",
+        "store_memory_and_data_node": "store_memory_and_data_node",
         "email_writing_agent": "email_writing_agent"
     }
 )
 
-builder.add_edge("parse_node", "store_memory_and_data_node")
+
 builder.add_edge("store_memory_and_data_node", END)
 builder.add_edge("unsafe_emails_node", END)
 builder.add_edge("archive_node", END)
-
-
-
-
-
-
-
-
 
 toolkit = GmailToolkit()
 

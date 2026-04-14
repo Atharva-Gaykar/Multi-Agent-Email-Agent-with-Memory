@@ -3,19 +3,27 @@ from googleapiclient.errors import HttpError
 from app.schemas.email_writing_agent_tools_schema import CreateDraftSchema, SendDraftSchema
 from langchain.tools import tool
 from langchain_google_community import GmailToolkit
-
+from typing import Annotated, Union
+from langchain_core.tools import InjectedToolCallId, tool
+from langgraph.types import Command
+from langchain_core.messages import SystemMessage, HumanMessage,ToolMessage,AIMessage,BaseMessage
 
 @tool(args_schema=CreateDraftSchema)
-def create_gmail_draft(to: str, subject: str, body: str):
+def create_gmail_draft(
+    to: Union[str, list], 
+    subject: str, 
+    body: str,
+    tool_call_id: Annotated[str, InjectedToolCallId] # Injected ID
+):
     """Creates a new Gmail draft after human approval."""
-
-    if isinstance(to, list):
-        if len(to) > 0:
-            to = str(to[0])
-        else:
-            return "ERROR: 'to' parameter is an empty list. Please provide a valid email string."
     
-    # 1. Pause and ask for review
+    if isinstance(to, list):
+        to = str(to[0]) if len(to) > 0 else "ERROR"
+    
+    if to == "ERROR":
+        return "ERROR: 'to' parameter is empty."
+
+    # 1. Human-in-the-loop Interrupt
     response = interrupt({
         "action": "review_draft",
         "data": {"to": to, "subject": subject, "body": body}
@@ -24,40 +32,59 @@ def create_gmail_draft(to: str, subject: str, body: str):
     toolkit = GmailToolkit() 
     draft_tool = [t for t in toolkit.get_tools() if t.name == "create_gmail_draft"][0]
 
-    # 2. Handle the response
+    # 2. Handle Logic
     if response.get("status") == "approved":
-        reply = draft_tool.invoke({
-            "message": body,
-            "to": [to],
-            "subject": subject
-        })
-
-        draft_id=reply.split(":")[1].strip()
-        return f"Successfully created draft : <id>{draft_id}</id> <subject>{subject}</subject> <body>{body}</body> take user permission before submitting"
-    
+        reply = draft_tool.invoke({"message": body, "to": [to], "subject": subject})
+        try:
+            draft_id = reply.split(":")[1].strip()
+            content = f"Successfully created draft: <id>{draft_id}</id> <subject>{subject}</subject> <body>{body}</body>"
+            
+            # UPDATE STATE: Save draft_id directly
+            return Command(
+                update={
+                    "draft_id": draft_id, 
+                    "reply_subject": subject,
+                    "reply_email_body": body,
+                    "messages": [ToolMessage(content, tool_call_id=tool_call_id)]
+                }
+            )
+        except IndexError:
+            return f"Draft created, but response parsing failed: {reply}"
     else:
-        # Get the feedback from the user response
-        feedback = response.get("feedback", "User rejected without specific notes.")
-        
-        # We return this to the AGENT so it can read it and rewrite the draft
-        return f"DRAFT REJECTED BY USER. Feedback: {feedback}. Please rewrite the draft based on this feedback and try again."
+        feedback = response.get("feedback", "User rejected.")
+        return f"DRAFT REJECTED BY USER. Feedback: {feedback}. Please rewrite."
     
 
-
+#---------------------------------------------------------------------------
 
 @tool(args_schema=SendDraftSchema)
-def send_draft_by_id(draft_id: str):
+def send_draft_by_id(
+    draft_id: str,
+    tool_call_id: Annotated[str, InjectedToolCallId] # Injected ID
+):
     """Sends a finalized Gmail draft by its ID."""
     try:
         toolkit = GmailToolkit()
         result = toolkit.api_resource.users().drafts().send(
             userId="me", body={"id": draft_id}
         ).execute()
-        return f"SUCCESS: Sent! a Gmail with  ID: <id>{result['id']}</id>"
+        
+        sent_id = result['id']
+        content = f"SUCCESS: Sent! a Gmail with ID: <id>{sent_id}</id>"
+        
+        # UPDATE STATE: Save sent_message_id directly
+        return Command(
+            update={
+                "sent_message_id": sent_id,
+                "messages": [ToolMessage(content, tool_call_id=tool_call_id)]
+            }
+        )
     except HttpError as error:
-        if error.resp.status == 404:
-            return f"ERROR: Draft ID {draft_id} was not found. Please verify the ID or check if it was already sent."
-        return f"ERROR: An unexpected error occurred: {error}"
+        error_msg = f"ERROR: {error}"
+        return Command(
+            update={"messages": [ToolMessage(error_msg, tool_call_id=tool_call_id)]}
+        )
+
 
 
 email_writing_agent_tools = [
