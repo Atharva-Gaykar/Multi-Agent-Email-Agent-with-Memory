@@ -23,6 +23,7 @@ from app.database.connection import pool
 from app.utils.embeddings import remote_embeddings
 from langgraph.checkpoint.postgres import PostgresSaver
 from langgraph.store.postgres import PostgresStore
+from app.tools.email_writing_agent_tools import email_writing_agent_tools
 
 # Define a standard retry policy for database-heavy nodes
 db_retry_policy = RetryPolicy(
@@ -67,7 +68,7 @@ builder.add_node(
 
 builder.add_node("archive_node", archive_node,retry=db_retry_policy)   
 
-builder.add_node("tools", ToolNode(tools), retry=tool_node_retry_policy)
+builder.add_node("tools", ToolNode(email_writing_agent_tools), retry=tool_node_retry_policy)
 
 # Edges (Same as your original logic)
 builder.add_edge(START, "safety_check_node")
@@ -133,16 +134,13 @@ builder.add_edge("store_memory_and_data_node", END)
 builder.add_edge("unsafe_emails_node", END)
 builder.add_edge("archive_node", END)
 
+
 toolkit = GmailToolkit()
-
-
-
 graph=builder.compile(checkpointer=checkpointer, store=memory_store,debug=True)
 
 
 
 
-display(graph)
 
 
 # try:
