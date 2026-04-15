@@ -11,3 +11,4 @@ google-auth==2.49.1
 langgraph-checkpoint-postgres
 psycopg2-binary==2.9.9
 transformers
+pydantic-setting
