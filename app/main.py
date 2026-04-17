@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel, EmailStr
 from typing import Optional, Dict, Any, TypedDict, Annotated, Sequence
-from langchain_core.messages import BaseMessage
+from langchain_core.messages import BaseMessage, HumanMessage
 from langgraph.graph import add_messages
 from langgraph.types import Command
 import uuid
@@ -11,8 +11,17 @@ from app.state.state import EmailAgentState
 from app.database.connection import get_session
 from app.database.utils import get_or_create_user
 from sqlalchemy.orm import Session
+from app.database.connection import SessionLocal
+
 
 logger = logging.getLogger(__name__)
+
+def get_session():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 app = FastAPI(title="AI Email Agent API")
 
@@ -32,7 +41,10 @@ class ReviewActionRequest(BaseModel):
     status: str  # "approved" or "rejected"
     feedback: Optional[str] = None
 
-
+class SendEmailRequest(BaseModel):
+    thread_id: str
+    user_id: str
+    human_message: str
 # --- Helper Functions ---
 
 def parse_interrupt(final_state: Dict[str, Any]) -> Optional[Dict[str, Any]]:
@@ -90,6 +102,7 @@ def process_email(request: EmailProcessRequest, db: Session = Depends(get_sessio
                     return {
                         "status": "needs_review",
                         "thread_id": thread_id,
+                        "messages": final_state.get("messages", []),
                         "triage_label": final_state.get("triage_label"),
                         "action": parsed_interrupt["action"],
                         "email_draft": {
@@ -133,17 +146,17 @@ def review_action(request: ReviewActionRequest) -> Dict[str, Any]:
         else:
             raise HTTPException(status_code=400, detail="Invalid status")
 
-        final_state = graph.invoke(payload, config=config)
+        intermediate_state = graph.invoke(payload, config=config)
         
         # Still in review phase
-        if "__interrupt__" in final_state and not final_state.get("draft_id"):
-            parsed_interrupt = parse_interrupt(final_state)
+        if "__interrupt__" in intermediate_state and not intermediate_state.get("draft_id"):
+            parsed_interrupt = parse_interrupt(intermediate_state)
             if parsed_interrupt:
                 data = parsed_interrupt["data"]
                 return {
                     "status": "needs_review",
                     "thread_id": request.thread_id,
-                    "triage_label": final_state.get("triage_label"),
+                    "triage_label": intermediate_state.get("triage_label"),
                     "action": parsed_interrupt["action"],
                     "email_draft": {
                         "to": data.get("to"),
@@ -153,12 +166,13 @@ def review_action(request: ReviewActionRequest) -> Dict[str, Any]:
                 }
         
         # Draft created, review complete
-        if final_state.get("draft_id"):
+        if intermediate_state.get("draft_id"):
             return {
                 "thread_id": request.thread_id,
-                "draft_id": final_state["draft_id"],
-                "reply_subject": final_state.get("reply_subject"),
-                "reply_email_body": final_state.get("reply_email_body"),
+                "draft_id": intermediate_state["draft_id"],
+                "messages": intermediate_state.get("messages", []),
+                "reply_subject": intermediate_state.get("reply_subject"),
+                "reply_email_body": intermediate_state.get("reply_email_body"),
             }
 
     except Exception as e:
@@ -167,8 +181,33 @@ def review_action(request: ReviewActionRequest) -> Dict[str, Any]:
 
 
 
+@app.post("/send_email")
+def send_email(request: SendEmailRequest) -> Dict[str, Any]:
+   
+        config = {
+            "configurable": {
+                "thread_id": request.thread_id,
+                "user_id": request.user_id
+            }
+        }
+
+        graph.update_state(
+          config,
+          {"messages": [HumanMessage(content=request.human_message)]},
+       as_node="prepare_context_node" 
+     )  
+        final_state = graph.invoke(None, config=config)
+
+        return {
+            "thread_id": request.thread_id,
+            "messages": final_state.get("messages", []),
+            "sent_message_id": final_state.get("sent_message_id")
+        }
+
+
+
 
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="127.0.0.1", port=8000)

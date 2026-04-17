@@ -2,6 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from app.core.config import settings
 from psycopg_pool import ConnectionPool
+from contextlib import contextmanager
 
 
 
@@ -25,6 +26,7 @@ engine = create_engine(
 )
 
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
+
 
 def get_session():
     db = SessionLocal()

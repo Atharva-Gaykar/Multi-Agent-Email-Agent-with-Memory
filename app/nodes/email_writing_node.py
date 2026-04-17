@@ -54,7 +54,7 @@ def route_after_tools(state: EmailAgentState):
     # logic 1: If we just successfully SENT the email, go to Parser -> Memory
     if last_tool_msg.name == "send_draft_by_id" and "SUCCESS" in content_upper:
         print("--- ROUTER: Send successful. Moving to Parse/Memory. ---")
-        return "parse_node"
+        return "store_memory_and_data_node"
     
     # logic 2: If we just created a DRAFT (or the send failed)
     # Go back to agent to talk to the user

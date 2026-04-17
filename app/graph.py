@@ -4,7 +4,7 @@ from langgraph.prebuilt import ToolNode ,tools_condition
 from app.nodes.archive_node import  archive_node
 from app.nodes.email_writing_node import *
 from langgraph.graph import StateGraph,END,START
-from app.tools.email_writing_agent_tools import create_gmail_draft, send_draft_by_id
+from app.tools.email_writing_agent_tools import create_gmail_draft, send_draft
 from app.nodes.safety_check_node import *
 from app.nodes.parse_node import parse_response_node
 from app.nodes.context_node import prepare_context_node

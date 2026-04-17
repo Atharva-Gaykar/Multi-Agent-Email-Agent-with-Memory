@@ -5,8 +5,10 @@ from langchain.tools import tool
 from langchain_google_community import GmailToolkit
 from typing import Annotated, Union
 from langchain_core.tools import InjectedToolCallId, tool
+from langchain.tools import ToolRuntime
 from langgraph.types import Command
 from langchain_core.messages import SystemMessage, HumanMessage,ToolMessage,AIMessage,BaseMessage
+from langgraph.graph import END
 
 @tool(args_schema=CreateDraftSchema)
 def create_gmail_draft(
@@ -37,7 +39,8 @@ def create_gmail_draft(
         reply = draft_tool.invoke({"message": body, "to": [to], "subject": subject})
         try:
             draft_id = reply.split(":")[1].strip()
-            content = f"Successfully created draft: <id>{draft_id}</id> <subject>{subject}</subject> <body>{body}</body>"
+
+            content = f"Draft created. User You MUST confirm before calling send_draft()."
             
             # UPDATE STATE: Save draft_id directly
             return Command(
@@ -46,7 +49,7 @@ def create_gmail_draft(
                     "reply_subject": subject,
                     "reply_email_body": body,
                     "messages": [ToolMessage(content, tool_call_id=tool_call_id)]
-                }
+                },goto=END
             )
         except IndexError:
             return f"Draft created, but response parsing failed: {reply}"
@@ -57,20 +60,20 @@ def create_gmail_draft(
 
 #---------------------------------------------------------------------------
 
-@tool(args_schema=SendDraftSchema)
-def send_draft_by_id(
-    draft_id: str,
-    tool_call_id: Annotated[str, InjectedToolCallId] # Injected ID
+
+def send_draft(
+    tool_call_id: Annotated[str, InjectedToolCallId],runtime: ToolRuntime # Injected ID
 ):
     """Sends a finalized Gmail draft by its ID."""
+
     try:
         toolkit = GmailToolkit()
         result = toolkit.api_resource.users().drafts().send(
-            userId="me", body={"id": draft_id}
+            userId="me", body={"id": runtime.state["draft_id"]}
         ).execute()
         
         sent_id = result['id']
-        content = f"SUCCESS: Sent! a Gmail with ID: <id>{sent_id}</id>"
+        content = f"SUCCESS: Sent! a Gmail"
         
         # UPDATE STATE: Save sent_message_id directly
         return Command(
@@ -89,5 +92,5 @@ def send_draft_by_id(
 
 email_writing_agent_tools = [
     create_gmail_draft,
-    send_draft_by_id
+    send_draft
 ]
