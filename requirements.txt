@@ -17,3 +17,4 @@ email-validator
 itsdangerous
 python-jose[cryptography]
 passlib[bcrypt]
+google-api-python-client
