@@ -1,3 +1,5 @@
+import os
+from app.core.config import settings
 from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel, EmailStr
 from typing import Optional, Dict, Any, TypedDict, Annotated, Sequence
@@ -11,24 +13,12 @@ from app.database.connection import get_session
 from app.database.utils import get_or_create_user
 from sqlalchemy.orm import Session
 from app.database.connection import SessionLocal
-from app.core.config import settings
 from fastapi import Request
-import os
 from app.database.models import User
 from app.core.auth import create_access_token,get_current_user
 
 # CREATE GMAIL AUTH FILES FROM HF SECRETS
 
-
-if not os.path.exists(settings.GMAIL_CREDENTIALS_PATH):
-
-    with open(settings.GMAIL_CREDENTIALS_PATH, "w") as f:
-        f.write(os.environ["GOOGLE_CREDENTIALS"])
-
-if not os.path.exists(settings.GMAIL_TOKEN_PATH):
-
-    with open(settings.GMAIL_TOKEN_PATH, "w") as f:
-        f.write(os.environ["GOOGLE_TOKEN"])
 
 
 logger = logging.getLogger(__name__)
