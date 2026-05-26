@@ -20,9 +20,8 @@ DB_URL_FOR_SQL_AL=settings.DB_URL_FOR_SQL_AL
 
 engine = create_engine(
     DB_URL_FOR_SQL_AL, 
-    echo=False, 
     pool_pre_ping=True, 
-    pool_recycle=1800
+    pool_recycle=300
 )
 
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
