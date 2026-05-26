@@ -34,7 +34,7 @@ from langchain_google_community import GmailToolkit
 credentials = get_gmail_credentials(
     token_file=str(TOKEN_PATH),
     scopes=["https://mail.google.com/"],
-    client_secret_file=str(CREDENTIALS_PATH),
+    client_sercret_file=str(CREDENTIALS_PATH),
 )
 
 # BUILD API RESOURCE
