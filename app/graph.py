@@ -16,7 +16,6 @@ from app.nodes.summarise_email_body_node import summarise_email_body_node
 from app.nodes.check_token_count_node import *
 from psycopg import OperationalError # Or sqlalchemy.exc.OperationalError depending on your driver
 from app.tools.email_writing_agent_tools import email_writing_agent_tools 
-from IPython.display import Image, display
 from app.persistance.memory_store_checkpointer_config import memory_store, checkpointer
 from langchain_google_community import GmailToolkit
 from app.database.connection import pool
@@ -134,21 +133,6 @@ builder.add_edge("store_memory_and_data_node", END)
 builder.add_edge("unsafe_emails_node", END)
 builder.add_edge("archive_node", END)
 
-
-toolkit = GmailToolkit()
 graph=builder.compile(checkpointer=checkpointer, store=memory_store,debug=True)
 
 
-
-
-
-
-# try:
-#     # This creates a PNG and saves it to your project folder
-#     graph_png = graph.get_graph().draw_mermaid_png()
-#     with open("graph.png", "wb") as f:
-#         f.write(graph_png)
-#     print("--- Graph image saved as 'graph.png' ---")
-# except Exception as e:
-#     # This happens if you don't have the 'pypydot' or 'graphviz' dependencies
-#     print(f"Could not generate graph image: {e}")
