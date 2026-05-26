@@ -14,3 +14,6 @@ psycopg-pool
 transformers
 pydantic-settings
 email-validator
+itsdangerous
+python-jose[cryptography]
+passlib[bcrypt]

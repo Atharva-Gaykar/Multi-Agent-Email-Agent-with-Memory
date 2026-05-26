@@ -4,7 +4,6 @@ from typing import Optional, Dict, Any, TypedDict, Annotated, Sequence
 from langchain_core.messages import BaseMessage, HumanMessage
 from langgraph.graph import add_messages
 from langgraph.types import Command
-import uuid
 import logging
 from app.graph import graph
 from app.state.state import EmailAgentState
@@ -12,6 +11,24 @@ from app.database.connection import get_session
 from app.database.utils import get_or_create_user
 from sqlalchemy.orm import Session
 from app.database.connection import SessionLocal
+from app.core.config import settings
+from fastapi import Request
+import os
+from app.database.models import User
+from app.core.auth import create_access_token,get_current_user
+
+# CREATE GMAIL AUTH FILES FROM HF SECRETS
+
+
+if not os.path.exists(settings.GMAIL_CREDENTIALS_PATH):
+
+    with open(settings.GMAIL_CREDENTIALS_PATH, "w") as f:
+        f.write(os.environ["GOOGLE_CREDENTIALS"])
+
+if not os.path.exists(settings.GMAIL_TOKEN_PATH):
+
+    with open(settings.GMAIL_TOKEN_PATH, "w") as f:
+        f.write(os.environ["GOOGLE_TOKEN"])
 
 
 logger = logging.getLogger(__name__)
@@ -29,7 +46,6 @@ app = FastAPI(title="AI Email Agent API")
 
 class EmailProcessRequest(BaseModel):
     thread_id: str
-    user_email: EmailStr
     sender_email_id: EmailStr
     sender_subject: str
     sender_email_body: str
@@ -37,13 +53,12 @@ class EmailProcessRequest(BaseModel):
 
 class ReviewActionRequest(BaseModel):
     thread_id: str
-    user_id: str
+    
     status: str  # "approved" or "rejected"
     feedback: Optional[str] = None
 
 class SendEmailRequest(BaseModel):
     thread_id: str
-    user_id: str
     human_message: str
 # --- Helper Functions ---
 
@@ -67,24 +82,38 @@ def parse_interrupt(final_state: Dict[str, Any]) -> Optional[Dict[str, Any]]:
 
 # --- Endpoints ---
 
+
+@app.post("/get-user-data")
+def get_user_data(user_email: EmailStr, db: Session = Depends(get_session)):
+    """Get user data by email."""
+    user = get_or_create_user(db, user_email)
+
+    token = create_access_token({
+            "id": user.id,
+            "email": user_email
+        })
+    return {"user_id": str(user.id), "email": user.email, "token": token}
+
+
+
 @app.post("/process-email")
-def process_email(request: EmailProcessRequest, db: Session = Depends(get_session)) -> Dict[str, Any]:
+def process_email(request: EmailProcessRequest, db: Session = Depends(get_session), current_user: User = Depends(get_current_user)) -> Dict[str, Any]:
     """Process email through the graph pipeline."""
     
     try:
-        user = get_or_create_user(db, request.user_email)
+        
         
         thread_id = request.thread_id
         config = {
             "configurable": {
                 "thread_id": thread_id,
-                "user_id": str(user.id)
+                "user_id": str(current_user.id)
             }
         }
         
         input_data = {
-            "user_email_id": request.user_email,
-            "user_id": user.id,
+            "user_email_id": current_user.email,
+            "user_id": current_user.id,
             "user_name": "Atharva",
             "sender_email_id": request.sender_email_id,
             "sender_subject": request.sender_subject,
@@ -123,14 +152,14 @@ def process_email(request: EmailProcessRequest, db: Session = Depends(get_sessio
 
 
 @app.post("/review-action")
-def review_action(request: ReviewActionRequest) -> Dict[str, Any]:
+def review_action(request: ReviewActionRequest,db: Session = Depends(get_session), current_user: User = Depends(get_current_user)) -> Dict[str, Any]:
     """Resume graph execution based on user review."""
     
     try:
         config = {
             "configurable": {
                 "thread_id": request.thread_id,
-                "user_id": request.user_id
+                "user_id": current_user.id
             }
         }
 
@@ -182,12 +211,12 @@ def review_action(request: ReviewActionRequest) -> Dict[str, Any]:
 
 
 @app.post("/send_email")
-def send_email(request: SendEmailRequest) -> Dict[str, Any]:
+def send_email(request: SendEmailRequest,db: Session = Depends(get_session),current_user: User = Depends(get_current_user)) -> Dict[str, Any]:
    
         config = {
             "configurable": {
                 "thread_id": request.thread_id,
-                "user_id": request.user_id
+                "user_id": current_user.id
             }
         }
 
@@ -195,7 +224,7 @@ def send_email(request: SendEmailRequest) -> Dict[str, Any]:
           config,
           {"messages": [HumanMessage(content=request.human_message)]},
        as_node="prepare_context_node" 
-     )  
+        )  
         final_state = graph.invoke(None, config=config)
 
         return {
@@ -210,4 +239,4 @@ def send_email(request: SendEmailRequest) -> Dict[str, Any]:
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    uvicorn.run(app, host="127.0.0.1", port=8080)

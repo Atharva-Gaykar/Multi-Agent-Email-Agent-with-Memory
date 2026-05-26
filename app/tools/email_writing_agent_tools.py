@@ -7,9 +7,10 @@ from typing import Annotated, Union
 from langchain_core.tools import InjectedToolCallId, tool
 from langchain.tools import ToolRuntime
 from langgraph.types import Command
-from langchain_core.messages import SystemMessage, HumanMessage,ToolMessage,AIMessage,BaseMessage
 from langgraph.graph import END
+from langchain_core.messages import ToolMessage,SystemMessage, HumanMessage
 
+from app.gmail_auth import gmail_toolkit ,api_resource
 @tool(args_schema=CreateDraftSchema)
 def create_gmail_draft(
     to: Union[str, list], 
@@ -31,8 +32,8 @@ def create_gmail_draft(
         "data": {"to": to, "subject": subject, "body": body}
     })
 
-    toolkit = GmailToolkit() 
-    draft_tool = [t for t in toolkit.get_tools() if t.name == "create_gmail_draft"][0]
+    
+    draft_tool = [t for t in gmail_toolkit.get_tools() if t.name == "create_gmail_draft"][0]
 
     # 2. Handle Logic
     if response.get("status") == "approved":
@@ -61,14 +62,15 @@ def create_gmail_draft(
 #---------------------------------------------------------------------------
 
 
+@tool
 def send_draft(
     tool_call_id: Annotated[str, InjectedToolCallId],runtime: ToolRuntime # Injected ID
 ):
     """Sends a finalized Gmail draft by its ID."""
 
     try:
-        toolkit = GmailToolkit()
-        result = toolkit.api_resource.users().drafts().send(
+    
+        result = gmail_toolkit.api_resource.users().drafts().send(
             userId="me", body={"id": runtime.state["draft_id"]}
         ).execute()
         
