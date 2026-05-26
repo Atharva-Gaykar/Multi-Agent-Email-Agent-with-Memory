@@ -9,6 +9,9 @@ license: apache-2.0
 short_description: Email  ai agent project with memory.
 ---
 
+
+Check out the configuration reference at https://huggingface.co/docs/hub/spaces-config-reference
+
 # 📧 AI-Driven Email Agent 🧠
 
 A production-grade, multi-agent system built with LangGraph and FastAPI that automates email triage, context retrieval, and drafting. This project demonstrates advanced implementation of **Long-term Memory**, **State Persistence**, and **Human-in-the-Loop Interrupts** using LangGraph's Functional API Command pattern.
