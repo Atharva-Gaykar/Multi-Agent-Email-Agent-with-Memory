@@ -18,3 +18,4 @@ itsdangerous
 python-jose[cryptography]
 passlib[bcrypt]
 google-api-python-client
+langchain-google-community
