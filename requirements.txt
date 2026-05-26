@@ -19,3 +19,6 @@ python-jose[cryptography]
 passlib[bcrypt]
 google-api-python-client
 langchain-google-community
+google-auth-oauthlib
+google-auth-httplib2
+bcrypt
