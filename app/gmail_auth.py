@@ -5,7 +5,7 @@ from app.core.config import settings
 AUTH_DIR = Path("/tmp/google_auth")
 AUTH_DIR.mkdir(parents=True, exist_ok=True)
 
-# FULL FILE PATHS
+
 CREDENTIALS_PATH = AUTH_DIR / "credentials.json"
 TOKEN_PATH = AUTH_DIR / "token.json"
 
@@ -19,7 +19,7 @@ if "GOOGLE_TOKEN" in os.environ:
 else:
     raise ValueError("GOOGLE_TOKEN secret is missing from environment variables!")
 
-# GMAIL IMPORTS
+
 from langchain_google_community.gmail.utils import (
     build_resource_service,
     get_gmail_credentials,
@@ -27,8 +27,6 @@ from langchain_google_community.gmail.utils import (
 from langchain_google_community import GmailToolkit
 
 credentials = get_gmail_credentials( 
-
-
     token_file=str(TOKEN_PATH.resolve()),
     scopes=["https://mail.google.com/"],
     client_sercret_file=str(CREDENTIALS_PATH.resolve()),  
