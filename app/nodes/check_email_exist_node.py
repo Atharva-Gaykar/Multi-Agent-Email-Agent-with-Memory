@@ -1,11 +1,11 @@
 
 from app.state.state import EmailAgentState
 from langchain_google_community import GmailToolkit
+from app.gmail_auth import gmail_toolkit ,api_resource
 
 def check_previous_email_exist_node(state: EmailAgentState):
     # Search for previous interactions with this sender
-    toolkit = GmailToolkit()
-    search_tool = [t for t in toolkit.get_tools() if t.name == "search_gmail"][0]
+    search_tool = [t for t in gmail_toolkit.get_tools() if t.name == "search_gmail"][0]
     results = search_tool.invoke(f"from:{state['sender_email_id']}")
 
     if len(results) == 0:
