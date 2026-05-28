@@ -30,10 +30,12 @@ from langchain_google_community.gmail.utils import (
 from langchain_google_community import GmailToolkit
 
 # LOAD CREDENTIALS - Fixed parameter name to 'client_secrets_file'
-credentials = get_gmail_credentials(
+credentials = get_gmail_credentials( 
+
+
     token_file=str(TOKEN_PATH.resolve()),
     scopes=["https://mail.google.com/"],
-    client_sercrets_file=str(CREDENTIALS_PATH.resolve()),  # <-- Fixed typo here
+    client_sercret_file=str(CREDENTIALS_PATH.resolve()),  # <-- Fixed typo here
 )
 
 # BUILD API RESOURCE
