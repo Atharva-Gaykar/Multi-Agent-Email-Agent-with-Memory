@@ -39,7 +39,7 @@ tool_node_retry_policy = RetryPolicy(
 )
 
 
-builder = StateGraph(EmailAgentState)
+
 
 # Nodes
 builder = StateGraph(EmailAgentState)
