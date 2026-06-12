@@ -16,6 +16,7 @@ from app.database.connection import SessionLocal
 from fastapi import Request
 from app.database.models import User
 from app.core.auth import create_access_token,get_current_user
+import traceback
 
 # CREATE GMAIL AUTH FILES FROM HF SECRETS
 
@@ -110,7 +111,13 @@ def process_email(request: EmailProcessRequest, db: Session = Depends(get_sessio
             "sender_email_body": request.sender_email_body,
         }
 
-        final_state = graph.invoke(input_data, config=config)
+        try:
+
+            final_state = graph.invoke(input_data, config=config)
+        except Exception as e:
+            logger.error(f"Error invoking graph: {str(e)}")
+            traceback.print_exc()
+            raise HTTPException(status_code=500, detail=f"Graph invocation error: {str(e)}")
 
         if final_state.get('triage_label') == "FOLLOW_UP_REQUIRED":
             if "__interrupt__" in final_state and not final_state.get("draft_id"):
@@ -138,6 +145,7 @@ def process_email(request: EmailProcessRequest, db: Session = Depends(get_sessio
 
     except Exception as e:
         logger.error(f"Error processing email: {str(e)}")
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -196,6 +204,7 @@ def review_action(request: ReviewActionRequest,db: Session = Depends(get_session
 
     except Exception as e:
         logger.error(f"Error in review action: {str(e)}")
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 

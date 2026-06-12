@@ -41,5 +41,10 @@ def archive_node(state: EmailAgentState,config: RunnableConfig) -> dict:
 
 
 
+
+
+
 # A Context Manager is a brilliant Python tool that automatically handles the setup and cleanup of a resource for you. It guarantees that no matter what happens inside your code—even if an unexpected error crashes the system—your resources (like database connections or files) are safely closed and cleaned up.
 # A context manager is a Python utility used to allocate and release resources precisely when we want them to. By wrapping our database generator with @contextmanager, it allows us to use the standard with statement. This guarantees resource safety, ensuring that our database session is automatically and cleanly closed in the finally block, even if our core logic throws a runtime exception.
+
+
