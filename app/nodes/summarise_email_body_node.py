@@ -11,12 +11,8 @@ from app.utils.token_utils import summarise_email_body
 
 def summarise_email_body_node(state:EmailAgentState)->dict:
 
-
     subject=state['sender_subject']
     body=state['sender_email_body']
-
-
-
     summary=summarise_email_body(body)
 
     return {"sender_email_body":summary}

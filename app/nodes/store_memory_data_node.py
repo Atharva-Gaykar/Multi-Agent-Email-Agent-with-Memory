@@ -8,6 +8,10 @@ from app.database.connection import get_session
 from app.database.utils import save_sent_email, save_received_email
 from langchain_core.messages import AIMessage
 from app.utils.token_utils import *
+from contextlib import contextmanager
+
+
+session_context=contextmanager(get_session)
 
 def store_memory_and_data_node(state: EmailAgentState, config: RunnableConfig):
     """
@@ -52,7 +56,7 @@ def store_memory_and_data_node(state: EmailAgentState, config: RunnableConfig):
     thread_id = config.get("configurable", {}).get("thread_id")
 
     # Using 'with' handles opening/closing even if an error occurs
-    with get_session() as session:
+    with session_context() as session:
         try:
             save_sent_email(session, sender_id, thread_id, state)
             save_received_email(session, sender_id, thread_id, state)
