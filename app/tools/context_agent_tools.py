@@ -7,7 +7,7 @@ from langgraph.prebuilt import InjectedState
 from langgraph.store.base import BaseStore
 
 @tool
-def search_memory_tool(
+def search_sender_memory_tool(
     query: str,
     limit: int = 3,
     # 1. Inject the entire Graph state at runtime
@@ -70,4 +70,4 @@ def give_previous_context(memory_summary: str) -> str:
     """
     return memory_summary
 
-context_agent_tools=[search_memory_tool,give_previous_context]
+context_agent_tools=[search_sender_memory_tool,give_previous_context]

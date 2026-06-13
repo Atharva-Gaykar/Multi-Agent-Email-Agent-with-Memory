@@ -15,7 +15,7 @@ context_agent = create_agent(
     store=memory_store,  
     middleware=[
         ToolCallLimitMiddleware[Any,None](
-           tool_name="search_memory",
+           tool_name="search_sender_memory_tool",
            run_limit=5,
          thread_limit=10,
         )
