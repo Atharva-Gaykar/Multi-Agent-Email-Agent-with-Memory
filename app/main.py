@@ -157,7 +157,7 @@ def review_action(request: ReviewActionRequest,db: Session = Depends(get_session
         config = {
             "configurable": {
                 "thread_id": request.thread_id,
-                "user_id": current_user.id
+                "user_id": str(current_user.id)
             }
         }
 
@@ -215,7 +215,7 @@ def send_email(request: SendEmailRequest,db: Session = Depends(get_session),curr
         config = {
             "configurable": {
                 "thread_id": request.thread_id,
-                "user_id": current_user.id
+                "user_id": str(current_user.id)
             }
         }
 
@@ -234,8 +234,8 @@ def send_email(request: SendEmailRequest,db: Session = Depends(get_session),curr
 
 
 
+# used for local testing
 
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=8080)
+# if __name__ == "__main__":
+#     import uvicorn
+#     uvicorn.run(app, host="127.0.0.1", port=8080)
