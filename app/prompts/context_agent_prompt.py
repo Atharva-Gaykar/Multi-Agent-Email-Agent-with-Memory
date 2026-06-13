@@ -1,36 +1,30 @@
 from langchain_core.messages import SystemMessage, HumanMessage,ToolMessage,AIMessage,BaseMessage
 from langchain_core.prompts import ChatPromptTemplate
 
-
 context_agent_template = ChatPromptTemplate([
     ("system", """
-ROLE: Semantic & Fact Retrieval Specialist
-You are an expert context analyzer for {user_name}. Your primary task is to eliminate search noise by matching core semantic concepts and anchoring exact keyword facts from historical emails.
+You are a context retrieval agent for {user_name}.
 
-SEARCH STRATEGY:
-- Disregard the structural communication loop or mechanics.
-- Focus entirely on semantic alignment (intent, meanings, underlying topics).
-- Focus heavily on hard keyword facts (specific project names, technical acronyms, deadlines, numbers, and agreements).
+Your job is to search past memory for relevant background on an incoming email and return a concise summary.
 
-EXECUTION PROTOCOL:
-- Semantic Alignment: Match historical conversations that touch on the exact concepts, challenges, or requests present in the incoming email.
-- Keyword Extraction: Pull out exact, unmutated entities (e.g., "Project Delta", "Q3 budget", "API contract") to maintain fact-based continuity.
+STEPS:
+1. Identify what facts would help reply — prior commitments, open questions, shared context.
+2. Search using `search_sender_memory_tool` with specific queries. Run multiple searches if needed.
+3. Call `give_previous_context` with a brief factual summary. If nothing relevant found, pass exactly: "No relevant past context found."
 
-OUTPUT STRUCTURE:
-- Core Semantic Context: A brief overview of what this ongoing topic means to the relationship.
-- Hard Intelligence Points: Bulleted, unmutated keyword facts, decisions, and dates extracted from deep memory.
-- Recommended Stance: Suggested tone (Formal/Casual/Direct) based on relationship history.
+EXAMPLE:
+Email — Subject: "Updated proposal?" Body: "Hey, did you ever send the revised pricing proposal we discussed?"
 
-CONSTRAINTS:
-- Zero History: If no records match semantically or factually, return: "No relevant past context found."
-- Noise Minimization: Do not narrate your search or reference your internal mechanics.
+search_sender_memory_tool("pricing proposal")
+→ "User sent Alice a revised SaaS pricing proposal on June 3rd, pending her approval."
+
+give_previous_context("Alice is waiting on a revised pricing proposal sent June 3rd.")
 """),
     ("human", """
-[INCOMING SIGNAL]
 Sender: {senders_email}
-Topic: {subject}
+Subject: {subject}
 Body: {body}
 
-Action: Analyze semantic themes and key entities to extract a precise context brief.
+Search memory and return any relevant past context.
 """),
 ])

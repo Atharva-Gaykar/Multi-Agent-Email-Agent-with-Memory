@@ -16,8 +16,7 @@ def search_sender_memory_tool(
     # 2. Inject the compiled graph storage layer 
     store: Annotated[BaseStore, InjectedState("store")] = InjectedState("store") 
 ) -> str:
-    """Search long-term memory for specific historical email contexts.
-    This tool automatically scopes the search to the active sender interaction.
+    """Accepts a SINGLE string query to search the sender's history. Execute this tool multiple times if you need to search for different facts
     """
     
     active_user = state.get("user_id")
