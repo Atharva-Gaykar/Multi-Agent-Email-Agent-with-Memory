@@ -12,11 +12,8 @@ memory_store = PostgresStore(
         "dims": 384, 
         "embed": remote_embeddings,
         
-        # FIX: Point exactly to the nested keys inside the stored JSON structure
         "fields": [
             "content.summary", 
-            "content.user_email_id", 
-            "content.receiver_email_id"
         ]
     }
 )
