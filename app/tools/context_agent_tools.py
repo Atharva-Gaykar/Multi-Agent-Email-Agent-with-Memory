@@ -1,7 +1,7 @@
 from typing import Any
 from langmem import create_search_memory_tool
 from langchain.tools import tool
-from typing import Dict, Any
+from typing import Dict, Any, Optional,Annotated
 from langchain.tools import tool
 from langgraph.prebuilt import InjectedState
 from langgraph.store.base import BaseStore
@@ -11,7 +11,8 @@ def search_memory_tool(
     query: str,
     limit: int = 3,
     # 1. Inject the entire Graph state at runtime
-    state: Dict[str, Any] = InjectedState, 
+     state: Annotated[Dict[str, Any], InjectedState] = InjectedState,
+    
     # 2. Inject the compiled graph storage layer
     store: BaseStore = InjectedState("store") 
 ) -> str:
