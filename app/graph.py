@@ -133,6 +133,6 @@ builder.add_edge("store_memory_and_data_node", END)
 builder.add_edge("unsafe_emails_node", END)
 builder.add_edge("archive_node", END)
 
-graph=builder.compile(checkpointer=checkpointer, store=memory_store,debug=True)
+graph=builder.compile(checkpointer=checkpointer, store=memory_store)
 
 
