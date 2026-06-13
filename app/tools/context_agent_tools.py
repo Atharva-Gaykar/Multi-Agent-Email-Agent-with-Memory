@@ -10,10 +10,10 @@ from langgraph.store.base import BaseStore
 def search_sender_memory_tool(
     query: str,
     limit: int = 3,
-    # 1. Inject the entire Graph state at runtime (Corrected ✅)
+    # 1. Inject the entire Graph state at runtime 
     state: Annotated[Dict[str, Any], InjectedState] = InjectedState,
     
-    # 2. Inject the compiled graph storage layer (Fixed line below 👇)
+    # 2. Inject the compiled graph storage layer 
     store: Annotated[BaseStore, InjectedState("store")] = InjectedState("store") 
 ) -> str:
     """Search long-term memory for specific historical email contexts.
@@ -28,7 +28,7 @@ def search_sender_memory_tool(
         return "Error: Cannot isolate history. Active sender_email_id is missing from state context."
 
     metadata_filter = {
-        "receiver_email_id": sender_email
+        "content.receiver_email_id": sender_email
     }
     
     results = store.search(
