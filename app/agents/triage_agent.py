@@ -19,7 +19,6 @@ triage_agent=ChatGroq(
 
 
 triage_agent=triage_agent.with_structured_output(
-
     TriageOutput,
     method="json_schema",
     include_raw=True,

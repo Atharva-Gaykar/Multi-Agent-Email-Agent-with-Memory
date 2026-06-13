@@ -11,13 +11,19 @@ from typing import Literal
 def search_sender_memory_tool(
     query: str,
     limit: int = 3,
-    runtime: ToolRuntime = None  # Inject everything natively here
+    state: InjectedState = None,  # Inject the LangGraph state here
+    runtime: ToolRuntime = None   # Retain your runtime for the store
 ) -> str:
-    """Accepts a SINGLE string query to search the sender's history. Execute this tool multiple times if you need to search for different facts."""
+    """Accepts a SINGLE string query to search the sender's history. 
+    Execute this tool multiple times if you need to search for different facts.
+    """
     
-    # 1. Pull values from graph state
-    active_user = runtime.state.get("user_id")
-    sender_email = runtime.state.get("sender_email_id") 
+    # 1. Pull values directly from the injected graph state safely
+    if not state:
+        return "Error: Graph state injection failed entirely."
+        
+    active_user = state.get("user_id")
+    sender_email = state.get("sender_email_id") 
     
     if not sender_email:
         return "Error: Cannot isolate history. Active sender_email_id is missing from state context."
@@ -27,6 +33,9 @@ def search_sender_memory_tool(
     }
     
     # 2. Access the BaseStore directly through runtime.store
+    if not runtime or not runtime.store:
+        return "Error: Runtime store context is missing."
+        
     results = runtime.store.search(
         namespace=("email", active_user, "collection"),
         query=query,
@@ -48,7 +57,6 @@ def search_sender_memory_tool(
         )
         
     return "\n".join(formatted_memories)
-
 
 
 
