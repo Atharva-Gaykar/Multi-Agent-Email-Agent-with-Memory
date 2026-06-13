@@ -1,27 +1,23 @@
 from typing import Any
-from langmem import create_search_memory_tool
-from langchain.tools import tool
+# from langmem import create_search_memory_tool
 from typing import Dict, Any, Optional,Annotated
-from langchain.tools import tool
+from langchain.tools import tool,ToolRuntime
 from langgraph.prebuilt import InjectedState
 from langgraph.store.base import BaseStore
+from typing import Literal
+  # Correct import path
 
 @tool
 def search_sender_memory_tool(
     query: str,
     limit: int = 3,
-    # 1. Inject the entire Graph state at runtime 
-    state: Annotated[Dict[str, Any], InjectedState] = InjectedState,
-    
-    # 2. Inject the compiled graph storage layer 
-    store: Annotated[BaseStore, InjectedState("store")] = InjectedState("store") 
+    runtime: ToolRuntime = None  # Inject everything natively here
 ) -> str:
-    """Accepts a SINGLE string query to search the sender's history. Execute this tool multiple times if you need to search for different facts
-    """
+    """Accepts a SINGLE string query to search the sender's history. Execute this tool multiple times if you need to search for different facts."""
     
-    active_user = state.get("user_id")
-    # Using fallback to match alternative naming conventions in your state
-    sender_email = state.get("sender_email_id") or state.get("senders_email") 
+    # 1. Pull values from graph state
+    active_user = runtime.state.get("user_id")
+    sender_email = runtime.state.get("sender_email_id") 
     
     if not sender_email:
         return "Error: Cannot isolate history. Active sender_email_id is missing from state context."
@@ -30,7 +26,8 @@ def search_sender_memory_tool(
         "content.receiver_email_id": sender_email
     }
     
-    results = store.search(
+    # 2. Access the BaseStore directly through runtime.store
+    results = runtime.store.search(
         namespace=("email", active_user, "collection"),
         query=query,
         filter=metadata_filter,
@@ -51,6 +48,7 @@ def search_sender_memory_tool(
         )
         
     return "\n".join(formatted_memories)
+
 
 
 
