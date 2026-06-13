@@ -40,23 +40,10 @@ def email_writing_agent_node(state: EmailAgentState) -> dict:
 
 
 
-def route_after_tools(state: EmailAgentState):
-    # Iterate backwards to find the latest ToolMessage
-    # This handles cases where the LLM might have sent a text follow-up
-    last_tool_msg = next((m for m in reversed(state["messages"]) 
-                         if isinstance(m, ToolMessage)), None)
+def route_after_tools(state):
 
-    if not last_tool_msg:
-        return "email_writing_agent"
-
-    content_upper = last_tool_msg.content.upper()
-    
-    # logic 1: If we just successfully SENT the email, go to Parser -> Memory
-    if last_tool_msg.name == "send_draft_by_id" and "SUCCESS" in content_upper:
-        print("--- ROUTER: Send successful. Moving to Parse/Memory. ---")
+    if state.get("sent_message_id"):
+        print("--- ROUTER: Send successful. Moving to Memory. ---")
         return "store_memory_and_data_node"
-    
-    # logic 2: If we just created a DRAFT (or the send failed)
-    # Go back to agent to talk to the user
-    print("--- ROUTER: Draft created or Tool failed. Returning to Agent. ---")
+
     return "email_writing_agent"

@@ -22,7 +22,7 @@ from app.database.connection import pool
 from app.utils.embeddings import remote_embeddings
 from langgraph.checkpoint.postgres import PostgresSaver
 from langgraph.store.postgres import PostgresStore
-from app.tools.email_writing_agent_tools import email_writing_agent_tools
+
 
 # Define a standard retry policy for database-heavy nodes
 db_retry_policy = RetryPolicy(
@@ -127,6 +127,7 @@ builder.add_conditional_edges(
         "email_writing_agent": "email_writing_agent"
     }
 )
+
 
 
 builder.add_edge("store_memory_and_data_node", END)

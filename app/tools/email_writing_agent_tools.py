@@ -1,3 +1,4 @@
+from os import name
 from langgraph.types import interrupt
 from googleapiclient.errors import HttpError
 from app.schemas.email_writing_agent_tools_schema import CreateDraftSchema, SendDraftSchema
@@ -9,8 +10,8 @@ from langchain.tools import ToolRuntime
 from langgraph.types import Command
 from langgraph.graph import END
 from langchain_core.messages import ToolMessage,SystemMessage, HumanMessage
-
 from app.gmail_auth import gmail_toolkit ,api_resource
+
 @tool(args_schema=CreateDraftSchema)
 def create_gmail_draft(
     to: Union[str, list], 
@@ -49,7 +50,8 @@ def create_gmail_draft(
                     "draft_id": draft_id, 
                     "reply_subject": subject,
                     "reply_email_body": body,
-                    "messages": [ToolMessage(content, tool_call_id=tool_call_id)]
+                    "messages": [ToolMessage(content, tool_call_id=tool_call_id)],
+                    "name": "create_gmail_draft"
                 },goto=END
             )
         except IndexError:
@@ -81,13 +83,14 @@ def send_draft(
         return Command(
             update={
                 "sent_message_id": sent_id,
-                "messages": [ToolMessage(content, tool_call_id=tool_call_id)]
+                "messages": [ToolMessage(content, tool_call_id=tool_call_id)],
+                "name": "send_draft"
             }
         )
     except HttpError as error:
         error_msg = f"ERROR: {error}"
         return Command(
-            update={"messages": [ToolMessage(error_msg, tool_call_id=tool_call_id)]}
+            update={"messages": [ToolMessage(error_msg, tool_call_id=tool_call_id)], "name": "send_draft"}
         )
 
 
