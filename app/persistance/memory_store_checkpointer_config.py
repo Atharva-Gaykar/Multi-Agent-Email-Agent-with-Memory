@@ -7,4 +7,7 @@ from app.utils.embeddings import remote_embeddings
 
 
 checkpointer = PostgresSaver(pool)
-memory_store = PostgresStore(pool, index={"dims": 384, "embed": remote_embeddings})
+memory_store = PostgresStore(pool, index={"dims": 384, "embed": remote_embeddings,"fields":["user_email_id","receiver_email_id","summary"]})
+
+
+
