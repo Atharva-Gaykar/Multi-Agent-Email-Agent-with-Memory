@@ -10,32 +10,27 @@ from langgraph.store.base import BaseStore
 def search_sender_memory_tool(
     query: str,
     limit: int = 3,
-    # 1. Inject the entire Graph state at runtime
-     state: Annotated[Dict[str, Any], InjectedState] = InjectedState,
+    # 1. Inject the entire Graph state at runtime (Corrected ✅)
+    state: Annotated[Dict[str, Any], InjectedState] = InjectedState,
     
-    # 2. Inject the compiled graph storage layer
-    store: BaseStore = InjectedState("store") 
+    # 2. Inject the compiled graph storage layer (Fixed line below 👇)
+    store: Annotated[BaseStore, InjectedState("store")] = InjectedState("store") 
 ) -> str:
     """Search long-term memory for specific historical email contexts.
     This tool automatically scopes the search to the active sender interaction.
     """
     
-    # Extract the runtime sender/receiver information directly from your graph state
-    # Replace keys with your exact LangGraph state schema keys (e.g., state.get("current_sender"))
     active_user = state.get("user_id")
-    sender_email = state.get("sender_email_id") 
+    # Using fallback to match alternative naming conventions in your state
+    sender_email = state.get("sender_email_id") or state.get("senders_email") 
     
-    # Fail gracefully if mandatory identification is missing in the state
     if not sender_email:
         return "Error: Cannot isolate history. Active sender_email_id is missing from state context."
 
-    # Formulate a strict metadata dictionary check matching your EmailMemory schema.
-    # We look for records where the communication partner matches the sender.
     metadata_filter = {
         "receiver_email_id": sender_email
     }
     
-    # Query your PostgresStore with explicit structural filters
     results = store.search(
         namespace=("email", active_user, "collection"),
         query=query,
@@ -46,7 +41,6 @@ def search_sender_memory_tool(
     if not results:
         return f"No prior email context found specifically for sender: {sender_email}."
         
-    # Format structural outputs cleanly for your Context Agent
     formatted_memories = []
     for item in results:
         val = item.value
@@ -58,6 +52,7 @@ def search_sender_memory_tool(
         )
         
     return "\n".join(formatted_memories)
+
 
 
 @tool
