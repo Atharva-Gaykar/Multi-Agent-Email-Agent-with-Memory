@@ -3,28 +3,31 @@ from langchain_core.prompts import ChatPromptTemplate
 
 context_agent_template = ChatPromptTemplate([
     ("system", """
-You are a context retrieval agent for {user_name}.
+ROLE: Context Retrieval Agent for {user_name}.
+MISSION: Retrieve only the most critical facts from memory to support a reply.
 
-Your job is to search past memory for relevant background on an incoming email and return a concise summary.
+WORKFLOW:
+1. EXTRACT: Identify 1-2 core technical entities or topics requiring verification (e.g., "backbone", "encryption key").
+2. SEARCH: Use `search_memory_tool` with short, high-entropy keywords. 
+3. SYNTHESIZE: Call `give_previous_context` with a concise summary. If no match, return: "No relevant past context found."
 
-STEPS:
-1. Identify what facts would help reply — prior commitments, open questions, shared context.
-2. Search using `search_sender_memory_tool` with specific queries. Run multiple searches if needed.
-3. Call `give_previous_context` with a brief factual summary. If nothing relevant found, pass exactly: "No relevant past context found."
+CONSTRAINTS:
+- Keep queries < 5 words.
+- Max 2 search calls to save tokens.
+- Do NOT repeat email content in queries.
 
 EXAMPLE:
-Email — Subject: "Updated proposal?" Body: "Hey, did you ever send the revised pricing proposal we discussed?"
-
-search_sender_memory_tool("pricing proposal")
-→ "User sent Alice a revised SaaS pricing proposal on June 3rd, pending her approval."
-
-give_previous_context("Alice is waiting on a revised pricing proposal sent June 3rd.")
+Email — Subject: "Model Update?" Body: "What is the CNN backbone for the NeuroAssist project?"
+- Query 1: "NeuroAssist CNN backbone"
+- Result: "Team using ResNet-50 for NeuroAssist."
+- Brief: "The NeuroAssist CNN model uses a ResNet-50 backbone."
 """),
     ("human", """
+[CONTEXT]
 Sender: {senders_email}
-Subject: {subject}
+Topic: {subject}
 Body: {body}
 
-Search memory and return any relevant past context.
+Action: Retrieve relevant context and provide a concise summary.
 """),
 ])

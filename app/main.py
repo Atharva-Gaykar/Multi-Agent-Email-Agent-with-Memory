@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 from app.database.connection import SessionLocal
 from fastapi import Request
 from app.database.models import User
+from app.utils.email_encode  import encode_email_for_namespace
 from app.core.auth import create_access_token,get_current_user
 import traceback
 
@@ -52,6 +53,9 @@ class SendEmailRequest(BaseModel):
     thread_id: str
     human_message: str
 # --- Helper Functions ---
+
+
+
 
 def parse_interrupt(final_state: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     """Parse interrupt from graph state."""
@@ -98,7 +102,8 @@ def process_email(request: EmailProcessRequest, db: Session = Depends(get_sessio
         config = {
             "configurable": {
                 "thread_id": thread_id,
-                "user_id": str(current_user.id)
+                "user_id": str(current_user.id),
+                "sender_email_id": encode_email_for_namespace(request.sender_email_id ),
             }
         }
         

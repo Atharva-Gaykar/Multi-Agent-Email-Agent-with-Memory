@@ -46,7 +46,7 @@ def patch_groq_for_extractions(model: ChatGroq):
 model=ChatGroq(model="openai/gpt-oss-20b", temperature=0.2)
 model = patch_groq_for_extractions(model)
 
-namespace = ("emails", "{user_id}", "collection")
+namespace = ("emails", "{user_id}", "{sender_email_id}")
 memory_manager_agent = create_memory_store_manager(
     model, 
     schemas=[EmailMemory],
