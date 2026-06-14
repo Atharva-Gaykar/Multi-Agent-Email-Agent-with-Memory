@@ -163,9 +163,15 @@ def review_action(request: ReviewActionRequest,db: Session = Depends(get_session
             "configurable": {
                 "thread_id": request.thread_id,
                 "user_id": str(current_user.id),
-                "sender_email_id": encode_email_for_namespace(request.sender_email_id ),
+                
             }
         }
+
+        state=graph.get_state(config)
+
+        sender_email_id=state.values['sender_email_id']
+
+        config["configurable"]["sender_email_id"] = encode_email_for_namespace(sender_email_id)
 
         if request.status == "rejected":
             payload = Command(resume={
@@ -222,9 +228,15 @@ def send_email(request: SendEmailRequest,db: Session = Depends(get_session),curr
             "configurable": {
                 "thread_id": request.thread_id,
                 "user_id": str(current_user.id),
-                "sender_email_id": encode_email_for_namespace(request.sender_email_id ),
             }
         }
+
+
+        state=graph.get_state(config)
+
+        sender_email_id=state.values['sender_email_id']
+
+        config["configurable"]["sender_email_id"] = encode_email_for_namespace(sender_email_id)
 
         graph.update_state(
           config,
