@@ -162,7 +162,8 @@ def review_action(request: ReviewActionRequest,db: Session = Depends(get_session
         config = {
             "configurable": {
                 "thread_id": request.thread_id,
-                "user_id": str(current_user.id)
+                "user_id": str(current_user.id),
+                "sender_email_id": encode_email_for_namespace(request.sender_email_id ),
             }
         }
 
@@ -220,7 +221,8 @@ def send_email(request: SendEmailRequest,db: Session = Depends(get_session),curr
         config = {
             "configurable": {
                 "thread_id": request.thread_id,
-                "user_id": str(current_user.id)
+                "user_id": str(current_user.id),
+                "sender_email_id": encode_email_for_namespace(request.sender_email_id ),
             }
         }
 
