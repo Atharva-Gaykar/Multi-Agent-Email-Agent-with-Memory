@@ -37,9 +37,11 @@ This project demonstrates **advanced implementations** of:
 - 💾 **State Persistence** using PostgreSQL Checkpointing
 - ⏸️ **Human-in-the-Loop Interrupts** via LangGraph's Functional API `Command` pattern
 - 🔐 **Custom Email Threat Detection** (99.35% accuracy with DistilBERT + XGBoost)
-- 🚀 **Production-Ready Orchestration** with FastAPI + Docker
 
-**Perfect for**: Enterprise email automation, customer support triage, HR workflows, security threat detection, and intelligent email routing.
+---
+## 🌐 Live Demo
+
+🔗 **[https://vinit006-emailagentwithmemory.hf.space/ui/](https://vinit006-emailagentwithmemory.hf.space/ui/)**
 
 ---
 
