@@ -39,6 +39,7 @@ This project demonstrates **advanced implementations** of:
 - 🔐 **Custom Email Threat Detection** (99.35% accuracy with DistilBERT + XGBoost)
 
 ---
+
 Why this is different from a typical email bot
 Most "AI email agent" projects are a single LLM call with a system prompt. This one is a coordinated set of agents sharing a persisted graph state:
 
@@ -47,6 +48,7 @@ A context agent retrieves relevant history using sender-scoped semantic memory
 A writing agent drafts the reply using that context
 
 The graph pauses before sending so a person can approve, edit, or reject the draft — and because the workflow state is checkpointed to PostgreSQL at every node, the review can happen minutes or days later without losing context, and the system recovers cleanly from a restart mid-workflow.
+
 ---
 ## 🌐 Live Demo
 
