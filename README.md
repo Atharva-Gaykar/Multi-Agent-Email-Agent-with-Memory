@@ -28,9 +28,9 @@ Check out the configuration reference at https://huggingface.co/docs/hub/spaces-
 
 ---
 
-# 📧 AI-Driven Email Agent 🧠
+# 📧 Multi-Agent Email Agent with Memory🧠
 
-A **production-grade, multi-agent email automation system** built with **LangGraph** and **FastAPI** that intelligently automates email triage, context retrieval, and professional draft generation with human review.
+A **multi-agent email automation system** built with **LangGraph** and **FastAPI** that intelligently automates email triage, context retrieval, and professional draft generation with human review.
 
 This project demonstrates **advanced implementations** of:
 - 🧠 **Semantic Memory Management** with `langmem` + PostgresStore
@@ -38,6 +38,15 @@ This project demonstrates **advanced implementations** of:
 - ⏸️ **Human-in-the-Loop Interrupts** via LangGraph's Functional API `Command` pattern
 - 🔐 **Custom Email Threat Detection** (99.35% accuracy with DistilBERT + XGBoost)
 
+---
+Why this is different from a typical email bot
+Most "AI email agent" projects are a single LLM call with a system prompt. This one is a coordinated set of agents sharing a persisted graph state:
+
+A triage agent classifies and prioritizes each email
+A context agent retrieves relevant history using sender-scoped semantic memory
+A writing agent drafts the reply using that context
+
+The graph pauses before sending so a person can approve, edit, or reject the draft — and because the workflow state is checkpointed to PostgreSQL at every node, the review can happen minutes or days later without losing context, and the system recovers cleanly from a restart mid-workflow.
 ---
 ## 🌐 Live Demo
 
